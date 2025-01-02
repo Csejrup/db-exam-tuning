@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "UYd5AosnwT7J4WMoXaX5oE/0mV20NUTFoemIiCf/YC4=",
+  "Source": "DbTuning.Api",
+  "BasePath": "_content/DbTuning.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

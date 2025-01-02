@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/DbTuning.Api.props" />
+</Project>
