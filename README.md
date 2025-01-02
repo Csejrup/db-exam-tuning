@@ -7,14 +7,13 @@ This guide explains how to set up and execute the scripts to create the schema, 
 Ensure you have the following installed and configured:
 
 1. **PostgreSQL**
-    - Download and install PostgreSQL from [PostgreSQL Official Website](https://www.postgresql.org/).
-    - Ensure `psql` (PostgreSQL command-line tool) is accessible from your terminal.
+    - Download and install PostgreSQL.
 
 2. **Database User**
     - Create a user with sufficient privileges to create schemas and execute scripts.
 
 3. **Clone Project**
-    - Clone or download the repository containing the SQL scripts.
+    - Clone or download the repository https://github.com/Csejrup/db-exam-tuning.git
 
 ## Step-by-Step Execution
 
@@ -53,14 +52,14 @@ psql -U <username> -d project_db -f scripts/add_indexes.sql
 
 Set up database roles and permissions:
 ```bash
-psql -U <username> -d project_db -f security.sql
+psql -U <username> -d project_db -f scripts/security.sql
 ```
 
 ### 6. Execute Trigger Script
 
 Set up triggers for automatic updates:
 ```bash
-psql -U <username> -d project_db -f triggers.sql
+psql -U <username> -d project_db -f scripts/triggers.sql
 ```
 
 ### 7. Analyze Queries
@@ -81,9 +80,3 @@ If you want to clean up the database:
 ```bash
 psql -U <username> -c "DROP DATABASE project_db;"
 ```
-
-## Troubleshooting
-
-- Ensure PostgreSQL is running and accessible.
-- Verify the username and password used for connecting to the database.
-- Use `pgAdmin` or similar tools for debugging.
