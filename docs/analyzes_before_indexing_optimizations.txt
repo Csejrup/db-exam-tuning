@@ -1,0 +1,220 @@
+                                     QUERY PLAN                                               
+--------------------------------------------------------------------------------------------------------
+ Seq Scan on products  (cost=0.00..21.50 rows=254 width=33) (actual time=0.023..0.155 rows=254 loops=1)
+   Filter: (category = 'Electronics'::text)
+   Rows Removed by Filter: 746
+ Planning Time: 0.473 ms
+ Execution Time: 0.219 ms
+(5 rows)
+
+                                                                             QUERY PLAN                                                                              
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=7490.56..7493.06 rows=1000 width=43) (actual time=88.769..89.217 rows=1000 loops=1)
+   Sort Key: (sum(((od.quantity)::numeric * od.price))) DESC
+   Sort Method: quicksort  Memory: 64kB
+   ->  Finalize GroupAggregate  (cost=7305.73..7440.73 rows=1000 width=43) (actual time=87.561..88.944 rows=1000 loops=1)
+         Group Key: p.name
+         ->  Gather Merge  (cost=7305.73..7420.73 rows=1000 width=43) (actual time=87.554..88.189 rows=2000 loops=1)
+               Workers Planned: 1
+               Workers Launched: 1
+               ->  Sort  (cost=6305.72..6308.22 rows=1000 width=43) (actual time=83.838..83.872 rows=1000 loops=2)
+                     Sort Key: p.name
+                     Sort Method: quicksort  Memory: 118kB
+                     Worker 0:  Sort Method: quicksort  Memory: 118kB
+                     ->  Partial HashAggregate  (cost=6243.39..6255.89 rows=1000 width=43) (actual time=83.323..83.507 rows=1000 loops=2)
+                           Group Key: p.name
+                           Batches: 1  Memory Usage: 577kB
+                           Worker 0:  Batches: 1  Memory Usage: 577kB
+                           ->  Hash Join  (cost=31.50..4475.47 rows=176792 width=21) (actual time=0.484..38.194 rows=150274 loops=2)
+                                 Hash Cond: (od.productid = p.productid)
+                                 ->  Parallel Seq Scan on orderdetails od  (cost=0.00..3977.92 rows=176792 width=14) (actual time=0.009..10.050 rows=150274 loops=2)
+                                 ->  Hash  (cost=19.00..19.00 rows=1000 width=15) (actual time=0.437..0.440 rows=1000 loops=2)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 55kB
+                                       ->  Seq Scan on products p  (cost=0.00..19.00 rows=1000 width=15) (actual time=0.038..0.223 rows=1000 loops=2)
+ Planning Time: 0.866 ms
+ Execution Time: 89.373 ms
+(24 rows)
+
+                                                          QUERY PLAN                                                          
+------------------------------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=228.01..2666.59 rows=10 width=19) (actual time=1.073..1.077 rows=0 loops=1)
+   Hash Cond: (o.customerid = c.customerid)
+   ->  Append  (cost=0.00..2172.40 rows=101360 width=23) (actual time=0.021..0.022 rows=1 loops=1)
+         ->  Seq Scan on orders_2023 o_1  (cost=0.00..23.60 rows=1360 width=32) (actual time=0.009..0.009 rows=0 loops=1)
+         ->  Seq Scan on orders_2024 o_2  (cost=0.00..1642.00 rows=100000 width=23) (actual time=0.011..0.011 rows=1 loops=1)
+   ->  Hash  (cost=228.00..228.00 rows=1 width=4) (actual time=1.042..1.043 rows=0 loops=1)
+         Buckets: 1024  Batches: 1  Memory Usage: 8kB
+         ->  Seq Scan on customers c  (cost=0.00..228.00 rows=1 width=4) (actual time=1.041..1.041 rows=0 loops=1)
+               Filter: (name = 'John Doe'::text)
+               Rows Removed by Filter: 10000
+ Planning Time: 1.067 ms
+ Execution Time: 1.116 ms
+(12 rows)
+
+
+
+                                                                QUERY PLAN                                                                
+------------------------------------------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=10124.09..17029.11 rows=370624 width=46) (actual time=120.131..176.041 rows=300547 loops=1)
+   Hash Cond: (o.orderid = od.orderid)
+   ->  Hash Join  (cost=328.00..2766.58 rows=101360 width=25) (actual time=2.609..25.897 rows=100000 loops=1)
+         Hash Cond: (o.customerid = c.customerid)
+         ->  Append  (cost=0.00..2172.40 rows=101360 width=16) (actual time=0.007..12.252 rows=100000 loops=1)
+               ->  Seq Scan on orders_2023 o_1  (cost=0.00..23.60 rows=1360 width=16) (actual time=0.003..0.003 rows=0 loops=1)
+               ->  Seq Scan on orders_2024 o_2  (cost=0.00..1642.00 rows=100000 width=16) (actual time=0.004..7.275 rows=100000 loops=1)
+         ->  Hash  (cost=203.00..203.00 rows=10000 width=17) (actual time=2.559..2.559 rows=10000 loops=1)
+               Buckets: 16384  Batches: 1  Memory Usage: 636kB
+               ->  Seq Scan on customers c  (cost=0.00..203.00 rows=10000 width=17) (actual time=0.003..1.032 rows=10000 loops=1)
+   ->  Hash  (cost=6039.25..6039.25 rows=300547 width=25) (actual time=116.666..116.667 rows=300547 loops=1)
+         Buckets: 524288  Batches: 1  Memory Usage: 21675kB
+         ->  Hash Join  (cost=31.50..6039.25 rows=300547 width=25) (actual time=0.293..64.028 rows=300547 loops=1)
+               Hash Cond: (od.productid = p.productid)
+               ->  Seq Scan on orderdetails od  (cost=0.00..5215.47 rows=300547 width=18) (actual time=0.012..15.504 rows=300547 loops=1)
+               ->  Hash  (cost=19.00..19.00 rows=1000 width=15) (actual time=0.264..0.264 rows=1000 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 55kB
+                     ->  Seq Scan on products p  (cost=0.00..19.00 rows=1000 width=15) (actual time=0.007..0.129 rows=1000 loops=1)
+ Planning Time: 0.309 ms
+ Execution Time: 184.858 ms
+(20 rows)
+
+
+                                                                              QUERY PLAN                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=14814.34..14839.34 rows=10000 width=45) (actual time=119.440..120.143 rows=10000 loops=1)
+   Sort Key: (sum(((od.quantity)::numeric * od.price))) DESC
+   Sort Method: quicksort  Memory: 775kB
+   ->  Finalize HashAggregate  (cost=14024.95..14149.95 rows=10000 width=45) (actual time=115.260..117.431 rows=10000 loops=1)
+         Group Key: c.name
+         Batches: 1  Memory Usage: 8593kB
+         ->  Gather  (cost=11749.95..13874.95 rows=20000 width=45) (actual time=97.142..101.555 rows=28945 loops=1)
+               Workers Planned: 2
+               Workers Launched: 2
+               ->  Partial HashAggregate  (cost=10749.95..10874.95 rows=10000 width=45) (actual time=88.459..90.897 rows=9648 loops=3)
+                     Group Key: c.name
+                     Batches: 1  Memory Usage: 4497kB
+                     Worker 0:  Batches: 1  Memory Usage: 4497kB
+                     Worker 1:  Batches: 1  Memory Usage: 4497kB
+                     ->  Parallel Hash Join  (cost=6515.82..9205.68 rows=154427 width=23) (actual time=42.412..63.301 rows=100182 loops=3)
+                           Hash Cond: (o.orderid = od.orderid)
+                           ->  Hash Join  (cost=328.00..1898.31 rows=42233 width=17) (actual time=1.770..10.382 rows=33333 loops=3)
+                                 Hash Cond: (o.customerid = c.customerid)
+                                 ->  Parallel Append  (cost=0.00..1459.41 rows=42234 width=8) (actual time=0.009..4.302 rows=33333 loops=3)
+                                       ->  Parallel Seq Scan on orders_2024 o_2  (cost=0.00..1230.24 rows=58824 width=8) (actual time=0.006..2.591 rows=33333 loops=3)
+                                       ->  Parallel Seq Scan on orders_2023 o_1  (cost=0.00..18.00 rows=800 width=8) (actual time=0.001..0.001 rows=0 loops=1)
+                                 ->  Hash  (cost=203.00..203.00 rows=10000 width=17) (actual time=1.730..1.730 rows=10000 loops=3)
+                                       Buckets: 16384  Batches: 1  Memory Usage: 636kB
+                                       ->  Seq Scan on customers c  (cost=0.00..203.00 rows=10000 width=17) (actual time=0.045..0.733 rows=10000 loops=3)
+                           ->  Parallel Hash  (cost=3977.92..3977.92 rows=176792 width=14) (actual time=40.189..40.189 rows=100182 loops=3)
+                                 Buckets: 524288  Batches: 1  Memory Usage: 18272kB
+                                 ->  Parallel Seq Scan on orderdetails od  (cost=0.00..3977.92 rows=176792 width=14) (actual time=0.017..13.050 rows=100182 loops=3)
+ Planning Time: 0.622 ms
+ Execution Time: 121.303 ms
+(29 rows)
+
+
+                                                                               QUERY PLAN                                                                                
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=6562.20..6562.20 rows=3 width=19) (actual time=71.159..71.783 rows=3 loops=1)
+   ->  Sort  (cost=6562.20..6564.70 rows=1000 width=19) (actual time=71.158..71.781 rows=3 loops=1)
+         Sort Key: (sum(od.quantity)) DESC
+         Sort Method: top-N heapsort  Memory: 25kB
+         ->  Finalize GroupAggregate  (cost=6419.27..6549.27 rows=1000 width=19) (actual time=70.658..71.691 rows=1000 loops=1)
+               Group Key: p.name
+               ->  Gather Merge  (cost=6419.27..6534.27 rows=1000 width=19) (actual time=70.653..71.455 rows=2000 loops=1)
+                     Workers Planned: 1
+                     Workers Launched: 1
+                     ->  Sort  (cost=5419.26..5421.76 rows=1000 width=19) (actual time=67.455..67.485 rows=1000 loops=2)
+                           Sort Key: p.name
+                           Sort Method: quicksort  Memory: 64kB
+                           Worker 0:  Sort Method: quicksort  Memory: 64kB
+                           ->  Partial HashAggregate  (cost=5359.43..5369.43 rows=1000 width=19) (actual time=67.066..67.137 rows=1000 loops=2)
+                                 Group Key: p.name
+                                 Batches: 1  Memory Usage: 129kB
+                                 Worker 0:  Batches: 1  Memory Usage: 129kB
+                                 ->  Hash Join  (cost=31.50..4475.47 rows=176792 width=15) (actual time=0.348..40.253 rows=150274 loops=2)
+                                       Hash Cond: (od.productid = p.productid)
+                                       ->  Parallel Seq Scan on orderdetails od  (cost=0.00..3977.92 rows=176792 width=8) (actual time=0.010..9.129 rows=150274 loops=2)
+                                       ->  Hash  (cost=19.00..19.00 rows=1000 width=15) (actual time=0.310..0.310 rows=1000 loops=2)
+                                             Buckets: 1024  Batches: 1  Memory Usage: 55kB
+                                             ->  Seq Scan on products p  (cost=0.00..19.00 rows=1000 width=15) (actual time=0.028..0.166 rows=1000 loops=2)
+ Planning Time: 0.404 ms
+ Execution Time: 71.883 ms
+(25 rows)
+
+                                             QUERY PLAN                                              
+-----------------------------------------------------------------------------------------------------
+ Seq Scan on products  (cost=0.00..521.50 rows=5 width=33) (actual time=3.001..3.002 rows=0 loops=1)
+   Filter: (to_tsvector('english'::regconfig, name) @@ to_tsquery('Laptop'::text))
+   Rows Removed by Filter: 1000
+ Planning Time: 4.381 ms
+ Execution Time: 3.023 ms
+(5 rows)
+
+                                                                           QUERY PLAN                                                                            
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate  (cost=2829.80..2880.97 rows=200 width=16) (actual time=33.415..35.714 rows=12 loops=1)
+   Group Key: (date_trunc('month'::text, orders.orderdate))
+   ->  Gather Merge  (cost=2829.80..2876.47 rows=400 width=16) (actual time=33.406..35.702 rows=36 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         ->  Sort  (cost=1829.78..1830.28 rows=200 width=16) (actual time=21.597..21.599 rows=12 loops=3)
+               Sort Key: (date_trunc('month'::text, orders.orderdate))
+               Sort Method: quicksort  Memory: 25kB
+               Worker 0:  Sort Method: quicksort  Memory: 25kB
+               Worker 1:  Sort Method: quicksort  Memory: 25kB
+               ->  Partial HashAggregate  (cost=1819.64..1822.14 rows=200 width=16) (actual time=21.566..21.570 rows=12 loops=3)
+                     Group Key: (date_trunc('month'::text, orders.orderdate))
+                     Batches: 1  Memory Usage: 40kB
+                     Worker 0:  Batches: 1  Memory Usage: 40kB
+                     Worker 1:  Batches: 1  Memory Usage: 40kB
+                     ->  Parallel Append  (cost=0.00..1608.47 rows=42234 width=8) (actual time=0.020..14.282 rows=33333 loops=3)
+                           ->  Parallel Seq Scan on orders_2024 orders_2  (cost=0.00..1377.30 rows=58824 width=8) (actual time=0.019..10.333 rows=33333 loops=3)
+                           ->  Parallel Seq Scan on orders_2023 orders_1  (cost=0.00..20.00 rows=800 width=8) (actual time=0.002..0.002 rows=0 loops=1)
+ Planning Time: 0.721 ms
+ Execution Time: 35.874 ms
+(20 rows)
+
+                                                            QUERY PLAN                                                             
+-----------------------------------------------------------------------------------------------------------------------------------
+ Hash Right Join  (cost=328.00..2766.58 rows=507 width=41) (actual time=43.100..43.103 rows=0 loops=1)
+   Hash Cond: (o.customerid = c.customerid)
+   Filter: (o.orderid IS NULL)
+   Rows Removed by Filter: 100000
+   ->  Append  (cost=0.00..2172.40 rows=101360 width=8) (actual time=0.013..19.962 rows=100000 loops=1)
+         ->  Seq Scan on orders_2023 o_1  (cost=0.00..23.60 rows=1360 width=8) (actual time=0.005..0.005 rows=0 loops=1)
+         ->  Seq Scan on orders_2024 o_2  (cost=0.00..1642.00 rows=100000 width=8) (actual time=0.007..13.032 rows=100000 loops=1)
+   ->  Hash  (cost=203.00..203.00 rows=10000 width=41) (actual time=2.958..2.959 rows=10000 loops=1)
+         Buckets: 16384  Batches: 1  Memory Usage: 859kB
+         ->  Seq Scan on customers c  (cost=0.00..203.00 rows=10000 width=41) (actual time=0.018..1.218 rows=10000 loops=1)
+ Planning Time: 0.423 ms
+ Execution Time: 43.152 ms
+(12 rows)
+
+
+                                                                             QUERY PLAN                                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=7244.07..7244.08 rows=4 width=40) (actual time=70.248..71.493 rows=4 loops=1)
+   Sort Key: (sum(((od.quantity)::numeric * od.price))) DESC
+   Sort Method: quicksort  Memory: 25kB
+   ->  Finalize GroupAggregate  (cost=7243.49..7244.03 rows=4 width=40) (actual time=70.235..71.484 rows=4 loops=1)
+         Group Key: p.category
+         ->  Gather Merge  (cost=7243.49..7243.95 rows=4 width=40) (actual time=70.227..71.473 rows=8 loops=1)
+               Workers Planned: 1
+               Workers Launched: 1
+               ->  Sort  (cost=6243.48..6243.49 rows=4 width=40) (actual time=67.235..67.236 rows=4 loops=2)
+                     Sort Key: p.category
+                     Sort Method: quicksort  Memory: 25kB
+                     Worker 0:  Sort Method: quicksort  Memory: 25kB
+                     ->  Partial HashAggregate  (cost=6243.39..6243.44 rows=4 width=40) (actual time=67.215..67.217 rows=4 loops=2)
+                           Group Key: p.category
+                           Batches: 1  Memory Usage: 24kB
+                           Worker 0:  Batches: 1  Memory Usage: 24kB
+                           ->  Hash Join  (cost=31.50..4475.47 rows=176792 width=18) (actual time=0.286..31.644 rows=150274 loops=2)
+                                 Hash Cond: (od.productid = p.productid)
+                                 ->  Parallel Seq Scan on orderdetails od  (cost=0.00..3977.92 rows=176792 width=14) (actual time=0.006..7.955 rows=150274 loops=2)
+                                 ->  Hash  (cost=19.00..19.00 rows=1000 width=12) (actual time=0.259..0.260 rows=1000 loops=2)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 54kB
+                                       ->  Seq Scan on products p  (cost=0.00..19.00 rows=1000 width=12) (actual time=0.019..0.122 rows=1000 loops=2)
+ Planning Time: 0.259 ms
+ Execution Time: 71.551 ms
+(24 rows)
